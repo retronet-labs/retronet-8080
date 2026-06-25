@@ -10,16 +10,8 @@ jobs:
     name: Build, vet e test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout retronet-8080
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          path: retronet-8080
-
-      - name: Checkout retronet-hardware
-        uses: actions/checkout@v4
-        with:
-          repository: retronet-labs/retronet-hardware
-          path: retronet-hardware
 
       - name: Configura Go
         uses: actions/setup-go@v5
@@ -28,7 +20,6 @@ jobs:
           check-latest: true
 
       - name: Verifica formattazione (gofmt)
-        working-directory: retronet-8080
         run: |
           non_formattati="$(gofmt -l .)"
           if [ -n "$non_formattati" ]; then
@@ -38,13 +29,10 @@ jobs:
           fi
 
       - name: Analisi statica (go vet)
-        working-directory: retronet-8080
         run: go vet ./...
 
       - name: Test
-        working-directory: retronet-8080
         run: go test -count=1 -v ./...
 
       - name: Conformance sintetica
-        working-directory: retronet-8080
         run: go run ./cmd/retronet-8080 -conformance

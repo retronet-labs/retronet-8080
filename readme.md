@@ -55,21 +55,11 @@ retronet-8080/
 
 ## Dipendenza hardware
 
-Il core delega ALU e flag al bridge `github.com/retronet-labs/retronet-hardware/bridge/i8080`.
-In sviluppo locale `go.mod` usa:
-
-```text
-replace github.com/retronet-labs/retronet-hardware => ../retronet-hardware
-```
-
-Questo richiede `retronet-hardware` come cartella sibling finche' il bridge
-`i8080` non viene pubblicato in una release taggata.
-
-Per lo stesso motivo il Dockerfile va costruito dal contesto workspace che
-contiene entrambi i repo:
+Il core delega ALU e flag al bridge `github.com/retronet-labs/retronet-hardware/bridge/i8080`,
+pubblicato da `retronet-hardware v0.5.0`.
 
 ```bash
-docker build -f retronet-8080/Dockerfile -t retronet/8080 .
+docker build -t retronet/8080 .
 ```
 
 ## Limiti

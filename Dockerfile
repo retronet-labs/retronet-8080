@@ -1,10 +1,8 @@
 FROM golang:1.26-alpine AS builder
 
 WORKDIR /src
-COPY retronet-8080 ./retronet-8080
-COPY retronet-hardware ./retronet-hardware
+COPY . .
 
-WORKDIR /src/retronet-8080
 RUN go build -o /out/retronet-8080 ./cmd/retronet-8080
 
 FROM alpine:latest
