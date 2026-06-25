@@ -1,0 +1,10 @@
+docs_do_not_commit/
+.gocache/
+tmp/
+/retronet-8080
+/retronet-8080.exe
+*.test
+
+# Workspace di sviluppo locale multi-repo (delega ALU a retronet-hardware/logic).
+go.work
+go.work.sum
