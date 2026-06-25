@@ -3,6 +3,7 @@ package conformance
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -23,6 +24,11 @@ func diagROMPath() string {
 	matches, _ := filepath.Glob("testdata/diag/*")
 	for _, m := range matches {
 		if strings.HasSuffix(m, ".gitignore") {
+			continue
+		}
+		// 8080EXM (esaustiva) è troppo lenta per l'auto-discovery: si lancia solo
+		// esplicitamente via RETRONET_8080_DIAG_ROM.
+		if strings.Contains(strings.ToUpper(m), "EXM") {
 			continue
 		}
 		if info, err := os.Stat(m); err == nil && !info.IsDir() {
@@ -54,10 +60,15 @@ func runCPMDiagnostic(t *testing.T, romPath string) string {
 	io := cpu.NewPorts()
 
 	var out strings.Builder
-	const maxSteps = 60_000_000
-	for i := 0; i < maxSteps; i++ {
+	maxSteps := 60_000_000 // default; le diagnostiche esaustive (8080EXM) ne servono molti di più
+	if s := os.Getenv("RETRONET_8080_DIAG_MAXSTEPS"); s != "" {
+		if n, err := strconv.Atoi(s); err == nil {
+			maxSteps = n // <= 0 = nessun limite
+		}
+	}
+	for i := 0; maxSteps <= 0 || i < maxSteps; i++ {
 		if c.Halted || c.Stopped {
-			break
+			return out.String()
 		}
 		switch c.PC {
 		case 0x0000:
@@ -74,16 +85,20 @@ func runCPMDiagnostic(t *testing.T, romPath string) string {
 			t.Fatalf("errore di esecuzione a PC=0x%04X: %v", c.PC, err)
 		}
 	}
-	t.Fatalf("la ROM non è terminata entro %d step", maxSteps)
+	t.Fatalf("la ROM non è terminata entro %d step; output parziale:\n%s", maxSteps, out.String())
 	return out.String()
 }
 
 // bdosPrint emula le funzioni BDOS di stampa: C=2 (carattere in E), C=9 (stringa
 // terminata da '$' all'indirizzo in DE).
 func bdosPrint(c *cpu.CPU8080, mem *cpu.FlatMemory, out *strings.Builder) {
+	emit := func(b byte) {
+		out.WriteByte(b)
+		os.Stdout.Write([]byte{b}) // streaming live (utile per le corse lunghe)
+	}
 	switch c.C {
 	case 2:
-		out.WriteByte(c.E)
+		emit(c.E)
 	case 9:
 		addr := uint16(c.D)<<8 | uint16(c.E)
 		for {
@@ -91,7 +106,7 @@ func bdosPrint(c *cpu.CPU8080, mem *cpu.FlatMemory, out *strings.Builder) {
 			if ch == '$' {
 				break
 			}
-			out.WriteByte(ch)
+			emit(ch)
 			addr++
 		}
 	}
