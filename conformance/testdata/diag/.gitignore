@@ -1,0 +1,4 @@
+# ROM diagnostiche CP/M per la validazione locale: NON versionarle (copyright).
+# Metti qui i .com/.bin (es. TST8080.COM, 8080PRE.COM, CPUDIAG.BIN).
+*
+!.gitignore
