@@ -39,6 +39,24 @@ go run ./cmd/retronet-8080 -bin "$env:TEMP\load-a.bin" -trace -steps 8
 - Profili conservativi: `generic`, `altair-8800`, `imsai-8080`, `cpm-dev`.
 - Debugger con trace JSON, breakpoint PC/opcode, watchpoint memoria e breakpoint
   I/O.
+- **Validato da 8080EXM**: supera l'exerciser esaustivo CP/M (oltre a TST8080 e
+  8080PRE) calcolando aritmetica, flag e rotazioni sull'**ALU a porte logiche**.
+  Vedi [docs/conformance.md](docs/conformance.md). Le ROM restano fuori dal repo.
+
+## Backend ALU configurabile
+
+Il core delega l'aritmetica a un backend intercambiabile, identico nei risultati
+e nei flag (garanzia del test differenziale `TestGateVsNativeALUDifferential`):
+
+- `cpu.Gate` (default) — l'ALU costruita dalle sole **porte logiche** di
+  retronet-logic, via bridge `i8080`.
+- `cpu.Native` — la stessa semantica con operatori Go: molto più veloce per le
+  diagnostiche esaustive e per la CI.
+
+```go
+c := cpu.NewCPU8080()        // ALU a porte (default)
+c.SetALU(cpu.Native)         // oppure: cpu.NewCPU8080WithALU(cpu.Native)
+```
 
 ## Struttura
 
@@ -56,7 +74,7 @@ retronet-8080/
 ## Dipendenza hardware
 
 Il core delega ALU e flag al bridge `github.com/retronet-labs/retronet-hardware/bridge/i8080`,
-pubblicato da `retronet-hardware v0.5.0`.
+pubblicato da `retronet-hardware v0.5.2`.
 
 ```bash
 docker build -t retronet/8080 .
@@ -67,5 +85,6 @@ docker build -t retronet/8080 .
 - Nessuna ROM storica inclusa.
 - Profili storici senza mappe S-100 o periferiche inventate.
 - Timing aggregato, non transizioni elettriche pin-by-pin.
-- Conformance sintetica interna, non ancora differenziale contro un secondo
-  emulatore indipendente.
+- Conformance sintetica interna; la validazione differenziale è verso le
+  diagnostiche CP/M (8080EXM) e tra i backend ALU gate/native, non ancora contro
+  un secondo emulatore indipendente.
