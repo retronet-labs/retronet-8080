@@ -16,7 +16,7 @@
 ## Dopo v0.1
 
 - confronto differenziale con emulatori indipendenti
-- backend `i8080` in `retronet-asm` con esempi stabili
+- backend `i8080` in `retronet-asm` con esempi stabili (completato)
 - mappe storiche Altair/IMSAI solo da fonti primarie
-- integrazione con `retronet-cpm`
+- integrazione con `retronet-cpm` (completata nel repo CP/M-like)
 - supporto a formati immagine e periferiche documentate
