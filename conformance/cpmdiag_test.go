@@ -55,6 +55,15 @@ func runCPMDiagnostic(t *testing.T, romPath string) string {
 	mem.Data[0x0005] = 0xC9 // RET di sicurezza all'entry BDOS
 
 	c := cpu.NewCPU8080()
+	// Backend ALU: di default le porte logiche (Gate). RETRONET_8080_ALU=native
+	// passa agli operatori Go, molto più veloce per le diagnostiche esaustive
+	// (8080EXM) — il comportamento è garantito identico dal test differenziale.
+	backend := "gate"
+	if strings.EqualFold(os.Getenv("RETRONET_8080_ALU"), "native") {
+		c.SetALU(cpu.Native)
+		backend = "native"
+	}
+	t.Logf("backend ALU: %s", backend)
 	c.PC = origin
 	c.SP = 0xFF00 // pila in cima alla TPA (le ROM di solito la reimpostano)
 	io := cpu.NewPorts()

@@ -28,19 +28,48 @@ type CPU8080 struct {
 	WaitStateCount    uint64
 	LastTiming        InstructionTiming
 	pendingWaitStates uint64
+
+	// alu è il backend aritmetico-logico scelto (Gate di default, Native per la
+	// velocità). È configurazione, non stato: Reset lo preserva.
+	alu ALUBackend
 }
 
 // NewCPU8080 crea una CPU nello stato di reset deterministico usato dal progetto.
+// Usa il backend ALU a porte (Gate); per sceglierne un altro vedi SetALU o
+// NewCPU8080WithALU.
 func NewCPU8080() *CPU8080 {
 	c := &CPU8080{}
 	c.Reset()
 	return c
 }
 
+// NewCPU8080WithALU crea una CPU che usa il backend aritmetico-logico indicato
+// (per esempio cpu.Native per la massima velocità).
+func NewCPU8080WithALU(backend ALUBackend) *CPU8080 {
+	c := NewCPU8080()
+	c.SetALU(backend)
+	return c
+}
+
+// SetALU sceglie il backend aritmetico-logico: cpu.Gate (porte logiche, default)
+// oppure cpu.Native (operatori Go, più veloce). nil ripristina il default Gate.
+func (c *CPU8080) SetALU(backend ALUBackend) { c.alu = backend }
+
+// backend restituisce il backend ALU attivo, defaultando a Gate se non impostato.
+func (c *CPU8080) backend() ALUBackend {
+	if c.alu == nil {
+		return Gate
+	}
+	return c.alu
+}
+
 // Reset azzera registri, flag e contatori. A differenza dell'8008, l'8080 parte
-// eseguibile: non entra in stopped storico e non richiede jam instruction.
+// eseguibile: non entra in stopped storico e non richiede jam instruction. Il
+// backend ALU scelto viene preservato (è configurazione, non stato).
 func (c *CPU8080) Reset() {
+	alu := c.alu
 	*c = CPU8080{}
+	c.alu = alu
 }
 
 func (c *CPU8080) setPC(addr uint16) { c.PC = addr }
