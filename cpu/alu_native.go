@@ -7,8 +7,9 @@ import (
 )
 
 // nativeBackend riproduce la semantica aritmetico-logica dell'8080 con i normali
-// operatori di Go. È funzionalmente identico al backend a porte (Gate), ma molto
-// più rapido: utile per le diagnostiche esaustive e come oracolo del differenziale.
+// operatori di Go. È funzionalmente identico al backend a porte (Gate), ma più
+// rapido (8080EXM ≈1,8×): utile per le diagnostiche esaustive e come oracolo del
+// differenziale.
 type nativeBackend struct{}
 
 func nativeParityEven(v byte) bool { return bits.OnesCount8(v)%2 == 0 }

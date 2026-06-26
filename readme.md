@@ -50,8 +50,8 @@ e nei flag (garanzia del test differenziale `TestGateVsNativeALUDifferential`):
 
 - `cpu.Gate` (default) — l'ALU costruita dalle sole **porte logiche** di
   retronet-logic, via bridge `i8080`.
-- `cpu.Native` — la stessa semantica con operatori Go: molto più veloce per le
-  diagnostiche esaustive e per la CI.
+- `cpu.Native` — la stessa semantica con operatori Go: più rapido sulle
+  diagnostiche esaustive (8080EXM ~194 s contro ~357 s su gate, ≈1,8×).
 
 ```go
 c := cpu.NewCPU8080()        // ALU a porte (default)

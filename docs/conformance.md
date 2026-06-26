@@ -52,14 +52,23 @@ RETRONET_8080_DIAG_ROM=/percorso/8080EXM.COM RETRONET_8080_DIAG_MAXSTEPS=0 \
 
 ### Backend ALU: porte vs operatori Go
 
-Il core usa per default l'ALU a **porte logiche** (`cpu.Gate`). 8080EXM su
-porte richiede alcuni minuti. Impostando `RETRONET_8080_ALU=native` la stessa
-diagnostica gira sul backend con **operatori Go** (`cpu.Native`) in pochi
-secondi — comodo per la CI. I due backend sono garantiti **identici** (risultato
-e ogni flag) dal test differenziale `TestGateVsNativeALUDifferential`
-([cpu/alu_diff_test.go](../cpu/alu_diff_test.go)), quindi il risultato di 8080EXM
-vale per entrambi.
+Il core usa per default l'ALU a **porte logiche** (`cpu.Gate`). 8080EXM è una
+corsa lunga (miliardi di istruzioni). Impostando `RETRONET_8080_ALU=native` la
+stessa diagnostica gira sul backend con **operatori Go** (`cpu.Native`), più
+rapido. Tempi misurati di un run completo (esito identico, `Tests complete`):
+
+| Backend | 8080EXM completo |
+| --- | --- |
+| `gate` (porte) | ~357 s |
+| `native` (Go) | ~194 s (≈1,8×) |
+
+Lo speedup è ~1,8× e non di ordini di grandezza: la ALU non è l'unico costo, il
+resto del ciclo di esecuzione (decode, accessi a memoria, intercetto BDOS a ogni
+step) pesa quanto l'aritmetica. I due backend sono comunque garantiti
+**identici** (risultato e ogni flag) dal test differenziale
+`TestGateVsNativeALUDifferential` ([cpu/alu_diff_test.go](../cpu/alu_diff_test.go)),
+quindi il risultato di 8080EXM vale per entrambi.
 
 ```powershell
-$env:RETRONET_8080_ALU = "native"   # poi rilancia il comando sopra: EXM in pochi secondi
+$env:RETRONET_8080_ALU = "native"   # poi rilancia il comando sopra (~194 s invece di ~357 s)
 ```

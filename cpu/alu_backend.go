@@ -10,8 +10,8 @@ import "github.com/retronet-labs/retronet-hardware/bridge/i8080"
 //     tramite il bridge i8080. È il default e dimostra che la CPU calcola su un
 //     datapath fatto di gate.
 //   - Native: la stessa semantica espressa con gli operatori aritmetici di Go.
-//     È molto più veloce (utile per le diagnostiche esaustive come 8080EXM e per
-//     la CI) e serve da oracolo per il test differenziale gate <-> native.
+//     È più veloce sulle diagnostiche esaustive (8080EXM ≈1,8×: la ALU è solo
+//     parte del costo) e serve da oracolo per il test differenziale gate <-> native.
 //
 // I due backend devono restituire lo stesso risultato e gli stessi flag su ogni
 // ingresso: è ciò che verifica TestGateVsNativeALUDifferential.
